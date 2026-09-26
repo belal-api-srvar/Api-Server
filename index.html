@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>API সার্ভার — টেস্ট প্যানেল</title>
+<style>
+  :root{color-scheme:dark}
+  body{background:#0b0d14;color:#e6e6f0;font-family:system-ui,sans-serif;max-width:640px;margin:0 auto;padding:20px}
+  h1{font-size:20px}
+  .card{background:#151824;border:1px solid #262a3a;border-radius:14px;padding:16px;margin-bottom:16px}
+  h2{font-size:15px;margin:0 0 10px;color:#8fb8ff}
+  label{font-size:12px;color:#9a9ab0;display:block;margin-bottom:4px}
+  input,select{width:100%;box-sizing:border-box;padding:9px 12px;border-radius:9px;border:1px solid #2c3044;background:#0f1119;color:#fff;margin-bottom:10px;font-size:14px}
+  button{width:100%;padding:11px;border:none;border-radius:9px;background:#5b6cff;color:#fff;font-weight:600;font-size:14px}
+  pre{background:#0a0c12;border-radius:9px;padding:10px;font-size:11px;overflow-x:auto;white-space:pre-wrap;word-break:break-all;max-height:260px;overflow-y:auto}
+</style>
+</head>
+<body>
+<h1>🧰 API সার্ভার — টেস্ট প্যানেল</h1>
+
+<div class="card">
+  <h2>🎬 YouTube সার্চ</h2>
+  <label>সার্চ শব্দ</label>
+  <input id="ytQ" placeholder="বাংলা রিমিক্স">
+  <button onclick="callApi('/api/youtube?action=search&q='+encodeURIComponent(document.getElementById('ytQ').value), 'ytOut')">সার্চ করুন</button>
+  <pre id="ytOut">এখানে ফলাফল দেখাবে</pre>
+</div>
+
+<div class="card">
+  <h2>⬇️ YouTube রিজলভ (ডাউনলোড লিংক)</h2>
+  <label>ভিডিও ID (যেমন dQw4w9WgXcQ)</label>
+  <input id="ytId" placeholder="video ID">
+  <label>ফরম্যাট</label>
+  <select id="ytFmt"><option value="mp4">mp4 (ভিডিও)</option><option value="mp3">mp3 (অডিও)</option></select>
+  <button onclick="callApi('/api/youtube?action=resolve&id='+document.getElementById('ytId').value+'&format='+document.getElementById('ytFmt').value, 'ytResolveOut')">রিজলভ করুন</button>
+  <pre id="ytResolveOut">এখানে ফলাফল দেখাবে</pre>
+</div>
+
+<div class="card">
+  <h2>🎵 TikTok — ইউজারের ভিডিও লিস্ট</h2>
+  <label>TikTok username (@ ছাড়া)</label>
+  <input id="ttUser" placeholder="username">
+  <button onclick="callApi('/api/tiktok?action=user&username='+document.getElementById('ttUser').value, 'ttOut')">লিস্ট আনুন</button>
+  <pre id="ttOut">এখানে ফলাফল দেখাবে</pre>
+</div>
+
+<div class="card">
+  <h2>🔗 TikTok — নির্দিষ্ট ভিডিও লিংক</h2>
+  <label>TikTok ভিডিও URL</label>
+  <input id="ttUrl" placeholder="https://www.tiktok.com/@.../video/...">
+  <button onclick="callApi('/api/tiktok?action=video&url='+encodeURIComponent(document.getElementById('ttUrl').value), 'ttVideoOut')">রিজলভ করুন</button>
+  <pre id="ttVideoOut">এখানে ফলাফল দেখাবে</pre>
+</div>
+
+<script>
+async function callApi(path, outId) {
+  const out = document.getElementById(outId);
+  out.textContent = "⏳ লোড হচ্ছে...";
+  try {
+    const r = await fetch(path);
+    const j = await r.json();
+    out.textContent = JSON.stringify(j, null, 2);
+  } catch (e) {
+    out.textContent = "❌ এরর: " + e.message;
+  }
+}
+</script>
+</body>
+</html>

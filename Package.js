@@ -1,0 +1,8 @@
+{
+  "name": "belal-api-server",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "axios": "^1.7.7"
+  }
+}

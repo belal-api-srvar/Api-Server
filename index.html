@@ -2,68 +2,593 @@
 <html lang="bn">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>API সার্ভার — টেস্ট প্যানেল</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Belal YT+ | চাঁদের পাহাড় — API Console</title>
 <style>
-  :root{color-scheme:dark}
-  body{background:#0b0d14;color:#e6e6f0;font-family:system-ui,sans-serif;max-width:640px;margin:0 auto;padding:20px}
-  h1{font-size:20px}
-  .card{background:#151824;border:1px solid #262a3a;border-radius:14px;padding:16px;margin-bottom:16px}
-  h2{font-size:15px;margin:0 0 10px;color:#8fb8ff}
-  label{font-size:12px;color:#9a9ab0;display:block;margin-bottom:4px}
-  input,select{width:100%;box-sizing:border-box;padding:9px 12px;border-radius:9px;border:1px solid #2c3044;background:#0f1119;color:#fff;margin-bottom:10px;font-size:14px}
-  button{width:100%;padding:11px;border:none;border-radius:9px;background:#5b6cff;color:#fff;font-weight:600;font-size:14px}
-  pre{background:#0a0c12;border-radius:9px;padding:10px;font-size:11px;overflow-x:auto;white-space:pre-wrap;word-break:break-all;max-height:260px;overflow-y:auto}
+:root{
+  --bg:#05070d; --card:#0e1220;
+  --bd:#212840; --ac:#00d4ff; --ac2:#7c3aff; --pink:#ff3d81;
+  --tx:#eef1ff; --mu:#8890b5; --gr:#2ecc71; --rd:#ff4d5e; --yw:#ffb020;
+  --radius:18px;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--bg); color:var(--tx);
+  font-family:"Segoe UI",Roboto,system-ui,"Noto Sans Bengali",sans-serif;
+  overflow:hidden;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+.hidden{display:none !important}
+/* ── অ্যানিমেটেড ব্যাকগ্রাউন্ড গ্লো ──────────────────────────── */
+.bg-glow{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.blob{position:absolute;border-radius:50%;filter:blur(70px);opacity:.35;animation:float 16s ease-in-out infinite}
+.blob.b1{width:420px;height:420px;background:var(--ac);top:-120px;left:-100px;animation-delay:0s}
+.blob.b2{width:380px;height:380px;background:var(--ac2);bottom:-140px;right:-100px;animation-delay:-6s}
+.blob.b3{width:300px;height:300px;background:var(--pink);top:40%;left:60%;animation-delay:-11s}
+@keyframes float{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(30px,-40px) scale(1.12)}}
+
+/* ── লেআউট ─────────────────────────────────────────────────── */
+.shell{position:relative;z-index:1;display:flex;height:100vh}
+.sidebar{
+  width:78px; background:rgba(10,12,20,.75); backdrop-filter:blur(14px);
+  border-right:1px solid var(--bd); display:flex; flex-direction:column;
+  align-items:center; padding:16px 0; gap:6px; flex-shrink:0;
+}
+.logo-wrap{width:46px;height:46px;border-radius:14px;margin-bottom:18px;position:relative;overflow:hidden;
+  background:linear-gradient(135deg,#132049,var(--ac));
+  border:1px solid rgba(0,212,255,.5); box-shadow:0 0 22px rgba(0,212,255,.5);
+  display:flex;align-items:center;justify-content:center;font-size:20px;animation:pulseLogo 2.6s ease-in-out infinite}
+.logo-wrap::after{content:"";position:absolute;inset:0;
+  background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.4) 48%,rgba(0,255,255,.3) 52%,transparent 70%);
+  background-size:250% 250%;background-position:130% 0;animation:sweep 3.2s ease-in-out infinite}
+@keyframes pulseLogo{0%,100%{box-shadow:0 0 18px rgba(0,212,255,.35)}50%{box-shadow:0 0 34px rgba(0,212,255,.8)}}
+@keyframes sweep{0%{background-position:130% 0}55%,100%{background-position:-30% 0}}
+
+.nav-btn{
+  width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;
+  font-size:21px;color:var(--mu);cursor:pointer;transition:.2s;position:relative;
+}
+.nav-btn:hover{background:rgba(255,255,255,.05);color:var(--tx)}
+.nav-btn.active{background:linear-gradient(135deg,rgba(0,212,255,.18),rgba(124,58,255,.18));color:var(--ac);box-shadow:0 0 16px rgba(0,212,255,.25)}
+.nav-btn .tip{
+  position:absolute; left:64px; background:#151a2c; border:1px solid var(--bd); padding:6px 10px;
+  border-radius:8px; font-size:12px; white-space:nowrap; opacity:0; pointer-events:none; transition:.15s; z-index:20;
+}
+.nav-btn:hover .tip{opacity:1}
+
+.main{flex:1; overflow-y:auto; position:relative; height:100vh}
+.topbar{
+  position:sticky; top:0; z-index:5; display:flex; align-items:center; justify-content:space-between;
+  padding:16px 22px; background:rgba(5,7,13,.7); backdrop-filter:blur(10px); border-bottom:1px solid var(--bd);
+}
+.brand{display:flex;flex-direction:column;line-height:1.25}
+.brand b{font-size:15px;background:linear-gradient(90deg,var(--ac),var(--ac2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.brand span{font-size:11px;color:var(--mu)}
+.pill{font-size:11px;padding:5px 11px;border-radius:20px;border:1px solid var(--bd);color:var(--mu);display:flex;align-items:center;gap:6px}
+.pill .dot{width:7px;height:7px;border-radius:50%;background:var(--gr);box-shadow:0 0 8px var(--gr)}
+
+.page{padding:22px; max-width:960px; margin:0 auto; animation:fadeUp .35s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.page h1{font-size:20px;margin:0 0 4px;display:flex;align-items:center;gap:10px}
+.page .sub{color:var(--mu);font-size:13px;margin-bottom:22px}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.card{
+  background:linear-gradient(160deg,var(--card),#0b0e1a); border:1px solid var(--bd); border-radius:var(--radius);
+  padding:18px; position:relative; overflow:hidden; transition:.2s;
+}
+.card:hover{border-color:rgba(0,212,255,.4); transform:translateY(-2px); box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.card .ic{font-size:26px;margin-bottom:10px}
+.card h3{margin:0 0 4px;font-size:15px}
+.card p{margin:0;color:var(--mu);font-size:12px;line-height:1.5}
+
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12px;color:var(--mu);margin-bottom:6px}
+.field input,.field select{
+  width:100%; padding:11px 14px; border-radius:11px; border:1px solid var(--bd); background:#0a0d17;
+  color:var(--tx); font-size:14px; outline:none; transition:.15s;
+}
+.field input:focus,.field select:focus{border-color:var(--ac); box-shadow:0 0 0 3px rgba(0,212,255,.12)}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row>.field{flex:1;min-width:150px}
+
+.btn{
+  border:none; border-radius:12px; padding:12px 18px; font-weight:700; font-size:13.5px; cursor:pointer;
+  background:linear-gradient(90deg,var(--ac),var(--ac2)); color:#04101c; transition:.15s; display:inline-flex; align-items:center; gap:8px;
+}
+.btn:hover{filter:brightness(1.1); transform:translateY(-1px)}
+.btn.ghost{background:transparent;border:1px solid var(--bd);color:var(--tx)}
+.btn.danger{background:linear-gradient(90deg,#ff4d5e,#ff8a5b);color:#1a0006}
+
+.panel{background:var(--card);border:1px solid var(--bd);border-radius:var(--radius);padding:20px;margin-bottom:18px}
+.panel h2{font-size:14px;margin:0 0 14px;color:var(--ac);display:flex;align-items:center;gap:8px}
+
+.out{
+  background:#05070f; border:1px solid var(--bd); border-radius:12px; padding:14px; margin-top:14px;
+  font-family:"Fira Code",monospace; font-size:11.5px; max-height:320px; overflow:auto; white-space:pre-wrap; word-break:break-all;
+  color:#9be8ff;
+}
+.res-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:14px}
+.res-card{background:#0a0d17;border:1px solid var(--bd);border-radius:12px;overflow:hidden;cursor:pointer;transition:.15s}
+.res-card:hover{border-color:var(--ac);transform:translateY(-2px)}
+.res-card img{width:100%;height:90px;object-fit:cover;display:block;background:#111}
+.res-card .t{padding:8px 10px;font-size:11.5px;line-height:1.3}
+.res-card .t small{color:var(--mu);display:block;margin-top:3px;font-size:10px}
+
+.badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(46,204,113,.15);color:var(--gr);font-weight:700}
+.badge.new{background:rgba(0,212,255,.15);color:var(--ac)}
+.badge.warn{background:rgba(255,176,32,.15);color:var(--yw)}
+.media-box{background:#0a0d17;border:1px solid var(--bd);border-radius:14px;padding:14px;margin-top:14px}
+.media-box video,.media-box audio{width:100%;border-radius:10px;background:#000}
+.media-box .mtitle{font-size:13px;margin:10px 0 6px;font-weight:600}
+.media-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.empty{color:var(--mu);font-size:13px;text-align:center;padding:30px 10px;border:1px dashed var(--bd);border-radius:14px}
+
+.theme-swatch{width:34px;height:34px;border-radius:10px;cursor:pointer;border:2px solid transparent}
+.theme-swatch.active{border-color:#fff}
+
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-thumb{background:var(--bd);border-radius:3px}
+
+@media (max-width:600px){
+  .sidebar{width:64px}
+  .nav-btn .tip{display:none}
+  .page{padding:16px}
+}
 </style>
 </head>
 <body>
-<h1>🧰 API সার্ভার — টেস্ট প্যানেল</h1>
 
-<div class="card">
-  <h2>🎬 YouTube সার্চ</h2>
-  <label>সার্চ শব্দ</label>
-  <input id="ytQ" placeholder="বাংলা রিমিক্স">
-  <button onclick="callApi('/api/youtube?action=search&q='+encodeURIComponent(document.getElementById('ytQ').value), 'ytOut')">সার্চ করুন</button>
-  <pre id="ytOut">এখানে ফলাফল দেখাবে</pre>
-</div>
+<div class="bg-glow"><div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div></div>
 
-<div class="card">
-  <h2>⬇️ YouTube রিজলভ (ডাউনলোড লিংক)</h2>
-  <label>ভিডিও ID (যেমন dQw4w9WgXcQ)</label>
-  <input id="ytId" placeholder="video ID">
-  <label>ফরম্যাট</label>
-  <select id="ytFmt"><option value="mp4">mp4 (ভিডিও)</option><option value="mp3">mp3 (অডিও)</option></select>
-  <button onclick="callApi('/api/youtube?action=resolve&id='+document.getElementById('ytId').value+'&format='+document.getElementById('ytFmt').value, 'ytResolveOut')">রিজলভ করুন</button>
-  <pre id="ytResolveOut">এখানে ফলাফল দেখাবে</pre>
-</div>
+<div class="shell">
+  <div class="sidebar">
+    <div class="logo-wrap">🌙</div>
+    <div class="nav-btn active" data-page="dashboard" onclick="go('dashboard')">🏠<span class="tip">ড্যাশবোর্ড</span></div>
+    <div class="nav-btn" data-page="youtube" onclick="go('youtube')">🎬<span class="tip">YouTube</span></div>
+    <div class="nav-btn" data-page="tiktok" onclick="go('tiktok')">🎵<span class="tip">TikTok</span></div>
+    <div class="nav-btn" data-page="facebook" onclick="go('facebook')">📘<span class="tip">Facebook</span></div>
+    <div class="nav-btn" data-page="instagram" onclick="go('instagram')">📸<span class="tip">Instagram</span></div>
+    <div class="nav-btn" data-page="addapi" onclick="go('addapi')">➕<span class="tip">নতুন API যোগ</span></div>
+    <div class="nav-btn" data-page="settings" onclick="go('settings')">⚙️<span class="tip">সেটিংস</span></div>
+  </div>
 
-<div class="card">
-  <h2>🎵 TikTok — ইউজারের ভিডিও লিস্ট</h2>
-  <label>TikTok username (@ ছাড়া)</label>
-  <input id="ttUser" placeholder="username">
-  <button onclick="callApi('/api/tiktok?action=user&username='+document.getElementById('ttUser').value, 'ttOut')">লিস্ট আনুন</button>
-  <pre id="ttOut">এখানে ফলাফল দেখাবে</pre>
-</div>
+  <div class="main">
+    <div class="topbar">
+      <div class="brand"><b>Belal YT+ | চাঁদের পাহাড়</b><span id="pageLabel">ড্যাশবোর্ড</span></div>
+      <div class="pill"><span class="dot"></span> Live · Vercel</div>
+    </div>
 
-<div class="card">
-  <h2>🔗 TikTok — নির্দিষ্ট ভিডিও লিংক</h2>
-  <label>TikTok ভিডিও URL</label>
-  <input id="ttUrl" placeholder="https://www.tiktok.com/@.../video/...">
-  <button onclick="callApi('/api/tiktok?action=video&url='+encodeURIComponent(document.getElementById('ttUrl').value), 'ttVideoOut')">রিজলভ করুন</button>
-  <pre id="ttVideoOut">এখানে ফলাফল দেখাবে</pre>
+    <div class="page" id="page-dashboard">
+      <h1>👋 স্বাগতম</h1>
+      <div class="sub">এখানে আপনার সব API-র সংক্ষিপ্ত অবস্থা দেখা যাবে</div>
+      <div class="grid" id="dashGrid"></div>
+
+      <div class="panel" style="margin-top:22px">
+        <h2>📊 রানটাইম তথ্য</h2>
+        <div class="grid">
+          <div class="card"><div class="ic">⚡</div><h3>প্ল্যাটফর্ম</h3><p>Vercel Serverless Functions</p></div>
+          <div class="card"><div class="ic">🧠</div><h3>মেমোরি</h3><p>প্রতি কল সর্বোচ্চ 1024MB (vercel.json-এ সেট করা)</p></div>
+          <div class="card"><div class="ic">⏱️</div><h3>টাইমআউট</h3><p>সর্বোচ্চ 60 সেকেন্ড/রিকোয়েস্ট</p></div>
+          <div class="card"><div class="ic">👨‍💻</div><h3>Developer</h3><p>Belal YT+ • চাঁদের পাহাড়</p></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page hidden" id="page-youtube">
+      <h1>🎬 YouTube রিজলভার</h1>
+      <div class="sub">সার্চ করুন অথবা সরাসরি ভিডিও ID দিয়ে ডাউনলোড লিংক বের করুন</div>
+
+      <div class="panel">
+        <h2>🔎 সার্চ</h2>
+        <div class="row"><div class="field"><label>সার্চ শব্দ</label><input id="ytQ" placeholder="বাংলা রিমিক্স"></div></div>
+        <button class="btn" onclick="ytSearch()">🔍 সার্চ করুন</button>
+        <div class="res-grid" id="ytResults"></div>
+      </div>
+
+      <div class="panel">
+        <h2>⬇️ সরাসরি রিজলভ</h2>
+        <div class="row">
+          <div class="field"><label>ভিডিও ID</label><input id="ytId" placeholder="dQw4w9WgXcQ"></div>
+          <div class="field" style="max-width:140px"><label>ফরম্যাট</label><select id="ytFmt"><option value="mp4">mp4</option><option value="mp3">mp3</option></select></div>
+        </div>
+        <button class="btn" onclick="ytResolve()">⚡ রিজলভ করুন</button>
+        <div id="ytOut"><div class="empty">ফলাফল এখানে দেখাবে…</div></div>
+      </div>
+    </div>
+
+    <div class="page hidden" id="page-tiktok">
+      <h1>🎵 TikTok টুলস</h1>
+      <div class="sub">নির্দিষ্ট ইউজারের ভিডিও লিস্ট অথবা একটা ভিডিও লিংক রিজলভ করুন</div>
+
+      <div class="panel">
+        <h2>👤 ইউজারের ভিডিও</h2>
+        <div class="row"><div class="field"><label>Username (@ ছাড়া)</label><input id="ttUser" placeholder="username"></div></div>
+        <button class="btn" onclick="ttUserFetch()">📥 লিস্ট আনুন</button>
+        <div class="res-grid" id="ttResults"></div>
+      </div>
+
+      <div class="panel">
+        <h2>🔗 একটা ভিডিও লিংক</h2>
+        <div class="row"><div class="field"><label>TikTok URL</label><input id="ttUrl" placeholder="https://www.tiktok.com/@.../video/..."></div></div>
+        <button class="btn" onclick="ttVideoFetch()">⚡ রিজলভ করুন</button>
+        <div id="ttOut"><div class="empty">ফলাফল এখানে দেখাবে…</div></div>
+      </div>
+    </div>
+
+    <div class="page hidden" id="page-facebook">
+      <h1>📘 Facebook ভিডিও রিজলভার</h1>
+      <div class="sub">⚠️ এখনো কোনো resolver API কনফিগার করা নেই — নিচে বা Settings-এ একটা বসান, সাথে সাথে চালু হয়ে যাবে</div>
+
+      <div class="panel">
+        <h2>🔗 ভিডিও লিংক</h2>
+        <div class="row"><div class="field"><label>Facebook ভিডিও URL</label><input id="fbUrl" placeholder="https://www.facebook.com/.../videos/..."></div></div>
+        <button class="btn" onclick="mediaResolve('facebook','fbUrl','fbOut')">⚡ রিজলভ করুন</button>
+        <div id="fbOut"></div>
+      </div>
+
+      <div class="panel">
+        <h2>🧩 Provider টেমপ্লেট (এই ব্রাউজারে সেভ হবে)</h2>
+        <div class="field"><label>API URL — {url} লিখুন যেখানে লিংক বসবে</label><input id="fbProvider" placeholder="https://example-api.com/fbdl?link={url}"></div>
+        <button class="btn ghost" onclick="saveProvider('facebook')">💾 সেভ করুন</button>
+      </div>
+    </div>
+
+    <div class="page hidden" id="page-instagram">
+      <h1>📸 Instagram ভিডিও রিজলভার</h1>
+      <div class="sub">⚠️ এখনো কোনো resolver API কনফিগার করা নেই — নিচে বা Settings-এ একটা বসান, সাথে সাথে চালু হয়ে যাবে</div>
+
+      <div class="panel">
+        <h2>🔗 রিল/পোস্ট লিংক</h2>
+        <div class="row"><div class="field"><label>Instagram URL</label><input id="igUrl" placeholder="https://www.instagram.com/reel/..."></div></div>
+        <button class="btn" onclick="mediaResolve('instagram','igUrl','igOut')">⚡ রিজলভ করুন</button>
+        <div id="igOut"></div>
+      </div>
+
+      <div class="panel">
+        <h2>🧩 Provider টেমপ্লেট (এই ব্রাউজারে সেভ হবে)</h2>
+        <div class="field"><label>API URL — {url} লিখুন যেখানে লিংক বসবে</label><input id="igProvider" placeholder="https://example-api.com/igdl?url={url}"></div>
+        <button class="btn ghost" onclick="saveProvider('instagram')">💾 সেভ করুন</button>
+      </div>
+    </div>
+
+    <div class="page hidden" id="page-addapi">
+      <h1>➕ নতুন API যোগ করুন</h1>
+      <div class="sub">নিজের বা যেকোনো পাবলিক API এখানে রেজিস্টার করে সরাসরি টেস্ট করুন</div>
+
+      <div class="panel">
+        <h2>🧩 নতুন এন্ট্রি</h2>
+        <div class="row">
+          <div class="field"><label>নাম</label><input id="apiName" placeholder="যেমন: AI Image Enhancer"></div>
+          <div class="field"><label>আইকন (ইমোজি)</label><input id="apiIcon" placeholder="🖼️" maxlength="2"></div>
+        </div>
+        <div class="field"><label>Base/Test URL (পূর্ণ URL, প্যারামিটারসহ হলেও চলবে)</label><input id="apiUrl" placeholder="https://example.com/api?key=..."></div>
+        <div class="field"><label>ছোট বিবরণ</label><input id="apiDesc" placeholder="এই API কী কাজ করে"></div>
+        <button class="btn" onclick="addCustomApi()">💾 সেভ করুন</button>
+      </div>
+
+      <div class="panel">
+        <h2>📚 আপনার যোগ করা API-গুলো</h2>
+        <div id="customList"></div>
+      </div>
+    </div>
+
+    <div class="page hidden" id="page-settings">
+      <h1>⚙️ সেটিংস</h1>
+      <div class="sub">থিম, ব্র্যান্ডিং ও লোকাল প্রেফারেন্স — এই ব্রাউজারেই সেভ থাকে</div>
+
+      <div class="panel">
+        <h2>🎨 থিম রং</h2>
+        <div class="row" id="themeSwatches"></div>
+      </div>
+
+      <div class="panel">
+        <h2>🏷️ ব্র্যান্ড নাম</h2>
+        <div class="field"><label>সাইটের নাম (উপরের বারে দেখাবে)</label><input id="brandInput" placeholder="Belal YT+ | চাঁদের পাহাড়"></div>
+        <button class="btn" onclick="saveBrand()">সেভ করুন</button>
+      </div>
+
+      <div class="panel">
+        <h2>🤖 বট আচরণ (config.json জেনারেটর)</h2>
+        <p style="color:var(--mu);font-size:12.5px;line-height:1.6;margin-top:0">
+          এখানে টগল করলে নিচে ঠিক সেই সেটিংসসহ একটা JSON স্নিপেট তৈরি হয়ে
+          যাবে — সেটা কপি করে আপনার বট প্যানেলের <b>config.json</b>-এ
+          পেস্ট করুন। এখানে টগল করাটা নিজে থেকে লাইভ বটকে বদলায় না (এই
+          ওয়েবসাইট আর Render বট আলাদা সার্ভার) — এটা শুধু সঠিক JSON
+          বানিয়ে দেয়, যাতে ম্যানুয়ালি ভুল না হয়।
+        </p>
+        <div class="field">
+          <label><input type="checkbox" id="cfgVercelDownload" onchange="updateConfigSnippet()"> ভিডিও/অডিও রিজলভ এই API সার্ভার (Vercel) থেকে করবে</label>
+        </div>
+        <div class="field">
+          <label><input type="checkbox" id="cfgFastest" onchange="updateConfigSnippet()"> Fastest mode (সাইজ-চেক স্কিপ করে সরাসরি পাঠানোর চেষ্টা — বড় ফাইলে সমস্যা হতে পারে)</label>
+        </div>
+        <div class="field">
+          <label>এই API সার্ভারের Base URL</label>
+          <input id="cfgBaseUrl" placeholder="https://your-project.vercel.app" oninput="updateConfigSnippet()">
+        </div>
+        <pre class="out" id="cfgSnippet">টগল করলে এখানে config.json স্নিপেট আসবে…</pre>
+        <button class="btn ghost" onclick="navigator.clipboard.writeText(document.getElementById('cfgSnippet').textContent);alert('✅ কপি হয়েছে')">📋 কপি করুন</button>
+      </div>
+
+      <div class="panel">
+        <h2>⚠️ গুরুত্বপূর্ণ সীমাবদ্ধতা (সততার সাথে জানানো)</h2>
+        <p style="color:var(--mu);font-size:13px;line-height:1.7">
+          এই সেটিংস পেজ থেকে Vercel-এর আসল Environment Variable বা সিক্রেট
+          কী পরিবর্তন করা সম্ভব না — সেটা করতে হয় Vercel Dashboard →
+          Settings → Environment Variables থেকে, সরাসরি। এখানে যা সেভ হয়
+          (থিম, নাম) তা শুধু এই ব্রাউজারে (localStorage), অন্য ডিভাইসে
+          দেখাবে না। "নতুন API যোগ" পেজের এন্ট্রিগুলোও একইভাবে শুধু এই
+          ব্রাউজারে সেভ থাকে — সবার জন্য স্থায়ীভাবে রাখতে চাইলে একটা
+          ডেটাবেজ (যেমন আপনার বটের MongoDB Atlas) যোগ করতে হবে, চাইলে
+          সেটাও পরে বানিয়ে দিতে পারি।
+        </p>
+      </div>
+    </div>
+
+  </div>
 </div>
 
 <script>
-async function callApi(path, outId) {
+const LABELS = { dashboard:"ড্যাশবোর্ড", youtube:"YouTube", tiktok:"TikTok", facebook:"Facebook", instagram:"Instagram", addapi:"নতুন API যোগ", settings:"সেটিংস" };
+function go(p){
+  document.querySelectorAll(".page").forEach(el=>el.classList.add("hidden"));
+  document.getElementById("page-"+p).classList.remove("hidden");
+  document.querySelectorAll(".nav-btn").forEach(el=>el.classList.toggle("active", el.dataset.page===p));
+  document.getElementById("pageLabel").textContent = LABELS[p] || p;
+  location.hash = p;
+  renderDashboard();
+  if(p==="settings"){ loadConfigToggles(); }
+  if(p==="facebook" || p==="instagram"){ loadProviders(); }
+}
+window.addEventListener("hashchange", ()=>{ const p=(location.hash||"#dashboard").slice(1); if(LABELS[p]) go(p); });
+
+const THEMES = { cyan:["#00d4ff","#7c3aff"], pink:["#ff3d81","#7c3aff"], green:["#2ecc71","#00d4ff"], orange:["#ffb020","#ff3d81"] };
+function applyTheme(name){
+  const t = THEMES[name] || THEMES.cyan;
+  document.documentElement.style.setProperty("--ac", t[0]);
+  document.documentElement.style.setProperty("--ac2", t[1]);
+  localStorage.setItem("theme", name);
+  document.querySelectorAll(".theme-swatch").forEach(s=>s.classList.toggle("active", s.dataset.t===name));
+}
+function initThemeSwatches(){
+  const wrap = document.getElementById("themeSwatches");
+  wrap.innerHTML = Object.keys(THEMES).map(k=>{
+    const [c1,c2] = THEMES[k];
+    return `<div class="theme-swatch" data-t="${k}" style="background:linear-gradient(135deg,${c1},${c2})" onclick="applyTheme('${k}')"></div>`;
+  }).join("");
+}
+
+function saveBrand(){
+  const v = document.getElementById("brandInput").value.trim();
+  if(!v) return;
+  localStorage.setItem("brand", v);
+  document.querySelector(".brand b").textContent = v;
+}
+function loadBrand(){
+  const v = localStorage.getItem("brand");
+  if(v){ document.querySelector(".brand b").textContent = v; document.getElementById("brandInput").value = v; }
+}
+
+function getProvider(platform){ return localStorage.getItem("provider_"+platform) || ""; }
+function saveProvider(platform){
+  const val = document.getElementById(platform==="facebook"?"fbProvider":"igProvider").value.trim();
+  localStorage.setItem("provider_"+platform, val);
+  alert("✅ সেভ হয়েছে — এখন থেকে "+platform+" রিজলভে এই API ব্যবহার হবে");
+  renderDashboard();
+}
+function loadProviders(){
+  const fb = document.getElementById("fbProvider"); if(fb) fb.value = getProvider("facebook");
+  const ig = document.getElementById("igProvider"); if(ig) ig.value = getProvider("instagram");
+}
+
+// ── সব প্ল্যাটফর্মের জন্য একই প্রিভিউ রেন্ডারার — real video/audio player + ডাউনলোড বাটন
+function renderMediaPreview(containerId, data, kind){
+  const box = document.getElementById(containerId);
+  if(!data || !data.ok || !data.url){
+    box.innerHTML = `<div class="media-box"><div class="empty">${(data && data.error) ? "❌ "+data.error : "কিছু পাওয়া যায়নি"}</div></div>`;
+    return;
+  }
+  const isAudio = kind==="mp3" || /\.mp3(\?|$)/i.test(data.url);
+  box.innerHTML = `
+    <div class="media-box">
+      ${data.thumbnail && !isAudio ? "" : ""}
+      ${isAudio
+        ? `<audio controls src="${data.url}"></audio>`
+        : `<video controls playsinline poster="${data.thumbnail||''}" src="${data.url}"></video>`}
+      <div class="mtitle">${data.title || "শিরোনাম নেই"}</div>
+      <div class="media-actions">
+        <a class="btn" href="${data.url}" target="_blank" download>⬇️ ডাউনলোড</a>
+        <button class="btn ghost" onclick="navigator.clipboard.writeText('${data.url}');alert('লিংক কপি হয়েছে')">📋 লিংক কপি</button>
+      </div>
+    </div>`;
+}
+
+async function mediaResolve(platform, inputId, outId){
+  const url = document.getElementById(inputId).value.trim();
   const out = document.getElementById(outId);
-  out.textContent = "⏳ লোড হচ্ছে...";
-  try {
-    const r = await fetch(path);
+  if(!url){ alert("লিংক দিন"); return; }
+  out.innerHTML = '<div class="empty">⏳ রিজলভ হচ্ছে...</div>';
+  const provider = getProvider(platform);
+  const qs = new URLSearchParams({ url });
+  if(provider) qs.set("provider", provider);
+  try{
+    const r = await fetch(`/api/${platform}?${qs.toString()}`);
+    const j = await r.json();
+    renderMediaPreview(outId, j, "mp4");
+  }catch(e){
+    out.innerHTML = `<div class="media-box"><div class="empty">❌ ${e.message}</div></div>`;
+  }
+}
+function updateConfigSnippet(){
+  const useVercel = document.getElementById("cfgVercelDownload")?.checked || false;
+  const fastest = document.getElementById("cfgFastest")?.checked || false;
+  const baseUrl = document.getElementById("cfgBaseUrl")?.value.trim() || "https://your-project.vercel.app";
+  localStorage.setItem("cfg_useVercel", useVercel);
+  localStorage.setItem("cfg_fastest", fastest);
+  localStorage.setItem("cfg_baseUrl", baseUrl);
+  const snippet = {
+    APIKEYS: {
+      VERCEL_API_BASE: baseUrl,
+      USE_VERCEL_RESOLVER: useVercel,
+      FASTEST_MODE: fastest
+    }
+  };
+  const out = document.getElementById("cfgSnippet");
+  if(out) out.textContent = JSON.stringify(snippet, null, 2);
+}
+function loadConfigToggles(){
+  const v = document.getElementById("cfgVercelDownload");
+  const f = document.getElementById("cfgFastest");
+  const b = document.getElementById("cfgBaseUrl");
+  if(v) v.checked = localStorage.getItem("cfg_useVercel") === "true";
+  if(f) f.checked = localStorage.getItem("cfg_fastest") === "true";
+  if(b) b.value = localStorage.getItem("cfg_baseUrl") || "";
+  updateConfigSnippet();
+}
+function getCustomApis(){ try { return JSON.parse(localStorage.getItem("customApis")||"[]"); } catch { return []; } }
+function saveCustomApis(list){ localStorage.setItem("customApis", JSON.stringify(list)); }
+
+function addCustomApi(){
+  const name = document.getElementById("apiName").value.trim();
+  const icon = document.getElementById("apiIcon").value.trim() || "🧩";
+  const url = document.getElementById("apiUrl").value.trim();
+  const desc = document.getElementById("apiDesc").value.trim();
+  if(!name || !url){ alert("নাম আর URL দুটোই লাগবে"); return; }
+  const list = getCustomApis();
+  list.push({ id: Date.now(), name, icon, url, desc });
+  saveCustomApis(list);
+  document.getElementById("apiName").value = "";
+  document.getElementById("apiIcon").value = "";
+  document.getElementById("apiUrl").value = "";
+  document.getElementById("apiDesc").value = "";
+  renderCustomList();
+  renderDashboard();
+}
+function removeCustomApi(id){
+  saveCustomApis(getCustomApis().filter(a=>a.id!==id));
+  renderCustomList();
+  renderDashboard();
+}
+async function testCustomApi(id){
+  const api = getCustomApis().find(a=>a.id===id);
+  if(!api) return;
+  const out = document.getElementById("custom-out-"+id);
+  out.textContent = "⏳ টেস্ট হচ্ছে...";
+  try{
+    const r = await fetch("/api/custom?target="+encodeURIComponent(api.url));
     const j = await r.json();
     out.textContent = JSON.stringify(j, null, 2);
-  } catch (e) {
-    out.textContent = "❌ এরর: " + e.message;
-  }
+  }catch(e){ out.textContent = "❌ এরর: "+e.message; }
+}
+function renderCustomList(){
+  const list = getCustomApis();
+  const wrap = document.getElementById("customList");
+  if(!list.length){ wrap.innerHTML = '<div class="empty">এখনো কোনো কাস্টম API যোগ করা হয়নি</div>'; return; }
+  wrap.innerHTML = list.map(a=>`
+    <div class="panel" style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div><b>${a.icon} ${a.name}</b><div style="color:var(--mu);font-size:12px">${a.desc||""}</div></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn ghost" onclick="testCustomApi(${a.id})">▶ টেস্ট</button>
+          <button class="btn danger" onclick="removeCustomApi(${a.id})">🗑</button>
+        </div>
+      </div>
+      <pre class="out" id="custom-out-${a.id}">টেস্ট করলে ফলাফল এখানে দেখাবে…</pre>
+    </div>
+  `).join("");
+}
+
+function renderDashboard(){
+  const grid = document.getElementById("dashGrid");
+  if(!grid) return;
+  const builtIn = [
+    { icon:"🎬", name:"YouTube", desc:"সার্চ + ডাউনলোড লিংক রিজলভ", page:"youtube", badge:"বিল্ট-ইন" },
+    { icon:"🎵", name:"TikTok", desc:"ইউজার ভিডিও + সিঙ্গেল লিংক রিজলভ", page:"tiktok", badge:"বিল্ট-ইন" },
+    { icon:"📘", name:"Facebook", desc:"ভিডিও রিজলভ (provider লাগবে)", page:"facebook", badge: getProvider("facebook") ? "চালু" : "কনফিগার লাগবে" },
+    { icon:"📸", name:"Instagram", desc:"রিল/পোস্ট রিজলভ (provider লাগবে)", page:"instagram", badge: getProvider("instagram") ? "চালু" : "কনফিগার লাগবে" },
+  ];
+  const custom = getCustomApis();
+  grid.innerHTML = builtIn.map(b=>`
+    <div class="card" onclick="go('${b.page}')" style="cursor:pointer">
+      <div class="ic">${b.icon}</div><h3>${b.name} <span class="badge ${b.badge==='কনফিগার লাগবে'?'warn':''}">${b.badge}</span></h3><p>${b.desc}</p>
+    </div>
+  `).join("") + custom.map(c=>`
+    <div class="card" onclick="go('addapi')" style="cursor:pointer">
+      <div class="ic">${c.icon}</div><h3>${c.name} <span class="badge new">কাস্টম</span></h3><p>${c.desc||"বিবরণ নেই"}</p>
+    </div>
+  `).join("");
+}
+
+async function ytSearch(){
+  const q = document.getElementById("ytQ").value.trim();
+  const box = document.getElementById("ytResults");
+  if(!q){ alert("সার্চ শব্দ দিন"); return; }
+  box.innerHTML = '<div class="empty">⏳ খোঁজা হচ্ছে...</div>';
+  try{
+    const r = await fetch("/api/youtube?action=search&q="+encodeURIComponent(q));
+    const j = await r.json();
+    if(!j.ok || !j.results?.length){ box.innerHTML = '<div class="empty">কোনো ফলাফল নেই</div>'; return; }
+    box.innerHTML = j.results.map(v=>`
+      <div class="res-card" onclick="document.getElementById('ytId').value='${v.id||v.videoId||""}'">
+        <img src="${v.thumbnail||""}" onerror="this.style.display='none'">
+        <div class="t">${(v.title||"শিরোনাম নেই").slice(0,40)}<small>${v.time||""}</small></div>
+      </div>
+    `).join("");
+  }catch(e){ box.innerHTML = '<div class="empty">❌ '+e.message+'</div>'; }
+}
+async function ytResolve(){
+  const id = document.getElementById("ytId").value.trim();
+  const fmt = document.getElementById("ytFmt").value;
+  const out = document.getElementById("ytOut");
+  if(!id){ alert("ভিডিও ID দিন"); return; }
+  out.innerHTML = '<div class="empty">⏳ রিজলভ হচ্ছে...</div>';
+  try{
+    const r = await fetch(`/api/youtube?action=resolve&id=${encodeURIComponent(id)}&format=${fmt}`);
+    const j = await r.json();
+    renderMediaPreview("ytOut", j, fmt);
+  }catch(e){ out.innerHTML = `<div class="media-box"><div class="empty">❌ ${e.message}</div></div>`; }
+}
+
+async function ttUserFetch(){
+  const u = document.getElementById("ttUser").value.trim();
+  const box = document.getElementById("ttResults");
+  if(!u){ alert("username দিন"); return; }
+  box.innerHTML = '<div class="empty">⏳ আনা হচ্ছে...</div>';
+  try{
+    const r = await fetch("/api/tiktok?action=user&username="+encodeURIComponent(u));
+    const j = await r.json();
+    if(!j.ok || !j.videos?.length){ box.innerHTML = '<div class="empty">কোনো ভিডিও পাওয়া যায়নি</div>'; return; }
+    box.innerHTML = j.videos.map(v=>`
+      <div class="res-card" onclick="window.open('${v.playUrl}','_blank')">
+        <img src="${v.cover||""}" onerror="this.style.display='none'">
+        <div class="t">${(v.title||"শিরোনাম নেই").slice(0,40)}<small>${v.durationSec||"?"}s</small></div>
+      </div>
+    `).join("");
+  }catch(e){ box.innerHTML = '<div class="empty">❌ '+e.message+'</div>'; }
+}
+async function ttVideoFetch(){
+  const u = document.getElementById("ttUrl").value.trim();
+  const out = document.getElementById("ttOut");
+  if(!u){ alert("URL দিন"); return; }
+  out.innerHTML = '<div class="empty">⏳ রিজলভ হচ্ছে...</div>';
+  try{
+    const r = await fetch("/api/tiktok?action=video&url="+encodeURIComponent(u));
+    const j = await r.json();
+    renderMediaPreview("ttOut", { ok:j.ok, url:j.playUrl, title:j.title, thumbnail:j.cover, error:j.error }, "mp4");
+  }catch(e){ out.innerHTML = `<div class="media-box"><div class="empty">❌ ${e.message}</div></div>`; }
+}
+
+initThemeSwatches();
+applyTheme(localStorage.getItem("theme") || "cyan");
+loadBrand();
+loadProviders();
+renderCustomList();
+renderDashboard();
+{
+  const startPage = (location.hash||"#dashboard").slice(1);
+  go(LABELS[startPage] ? startPage : "dashboard");
 }
 </script>
 </body>
